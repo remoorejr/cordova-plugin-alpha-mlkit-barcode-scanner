@@ -426,7 +426,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     [self.view addSubview:self.torchButton];
 
     // Highlight mode needs a button to confirm the selected barcode.
-    if (self.captureButton || self.highlightBarcode) {
+    if ((self.captureButton || self.highlightBarcode) && self.showCaptureButton) {
         CGFloat captureSize = 72.0;
         UIButton *captureButton = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth/2 - captureSize/2,
                                                                             screenHeight-screenOffset-buttonSize/2-captureSize/2,

@@ -23,6 +23,7 @@ export interface IOptions {
   captureButton?: boolean;
   detectorHeight?: number;
   highlightBarcode?: boolean;
+  showCaptureButton?: boolean;
 }
 
 export interface IConfig {
@@ -34,6 +35,7 @@ export interface IConfig {
   captureButton: boolean;
   detectorHeight: number;
   highlightBarcode: boolean;
+  showCaptureButton: boolean;
 }
 
 export interface IResult {

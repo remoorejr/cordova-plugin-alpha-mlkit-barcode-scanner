@@ -23,4 +23,5 @@ export const defaultOptions: Required<IOptions> = Object.freeze({
   captureButton: false,
   detectorHeight: 0,
   highlightBarcode: false,
+  showCaptureButton: true,
 });

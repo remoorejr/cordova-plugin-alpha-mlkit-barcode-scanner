@@ -34,6 +34,7 @@
 @property(nonatomic,assign) BOOL captureButton;
 @property(nonatomic,assign) CGFloat detectorHeight;
 @property(nonatomic,assign) BOOL highlightBarcode;
+@property(nonatomic,assign) BOOL showCaptureButton;
 
 @end
 

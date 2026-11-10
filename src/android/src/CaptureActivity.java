@@ -157,7 +157,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
     _CaptureButtonMode = _HighlightMode || getIntent().getBooleanExtra("CaptureButton", false);
     if (_CaptureButtonMode) {
       View captureButton = findViewById(getResources().getIdentifier("capture_button", "id", getPackageName()));
-      captureButton.setVisibility(View.VISIBLE);
+      captureButton.setVisibility(getIntent().getBooleanExtra("ShowCaptureButton", true) ? View.VISIBLE : View.GONE);
       captureButton.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {

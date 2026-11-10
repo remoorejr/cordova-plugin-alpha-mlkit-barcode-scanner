@@ -110,6 +110,7 @@ const defaultOptions = {
   captureButton: false,
   detectorHeight: 0,
   highlightBarcode: false,
+  showCaptureButton: true,
 };
 ```
 
@@ -135,6 +136,9 @@ cordova.plugins.mlkit.barcodeScanner.scan(
   failure,
 );
 ```
+
+`showCaptureButton`: whether the capture button is shown at the bottom of the scanner when `captureButton`
+or `highlightBarcode` is enabled. Set it to `false` to capture only by tapping the scan area.
 
 ### Output/Return value
 
