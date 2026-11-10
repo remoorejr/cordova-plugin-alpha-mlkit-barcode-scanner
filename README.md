@@ -115,7 +115,7 @@ const defaultOptions = {
 
 `captureButton`: when `true`, a capture button is shown at the bottom of the scanner.
 Barcodes are no longer scanned automatically; the user lines up the barcode in the viewfinder
-and taps the button to scan it. If no barcode is found, a short message is shown and the user can try again.
+and taps the scan area or the button to scan it. If no barcode is found, a short message is shown and the user can try again.
 
 `detectorHeight`: height of the scan area. `detectorSize` is the width of the scan area and
 `detectorHeight` its height, both as a fraction of the smaller screen dimension (e.g. `detectorSize: 0.9`
@@ -125,7 +125,7 @@ Only barcodes inside the scan area are read.
 `highlightBarcode`: when `true`, all barcodes inside the scan area are outlined and the one that will be
 returned is highlighted in green and its value is shown above it. By default it is the barcode closest to the
 center of the scan area. If it is not the right one, tap another outlined barcode to select it instead.
-Tap the capture button (shown automatically in this mode) to return the selected barcode.
+Tap the selected barcode, or anywhere else in the scan area, (or the capture button, shown automatically in this mode) to return the selected barcode.
 Example for a page full of barcodes:
 
 ```javascript

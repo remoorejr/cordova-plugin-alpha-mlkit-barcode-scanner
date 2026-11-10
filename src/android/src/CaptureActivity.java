@@ -202,7 +202,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
   private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-      if (_HighlightMode && selectHitAt(e.getRawX(), e.getRawY())) {
+      if (handleTargetTap(e.getRawX(), e.getRawY())) {
         return true;
       }
       return super.onSingleTapConfirmed(e);
@@ -632,14 +632,30 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
     drawOverlay();
   }
 
-  /** Lets the user select another highlighted barcode by tapping on it. */
-  private boolean selectHitAt(float rawX, float rawY) {
+  /**
+   * Tapping the target area captures the barcode. In highlight mode, tapping another outlined barcode
+   * selects it instead; tapping the selected barcode (or empty space in the target area) returns it.
+   */
+  private boolean handleTargetTap(float rawX, float rawY) {
+    if (!_CaptureButtonMode) {
+      return false;
+    }
+
     int[] location = new int[2];
     surfaceView.getLocationOnScreen(location);
     float x = rawX - location[0];
     float y = rawY - location[1];
-    float slop = 24 * _Density;
 
+    if (!getTargetRect(surfaceView.getWidth(), surfaceView.getHeight()).contains(x, y)) {
+      return false;
+    }
+
+    if (!_HighlightMode) {
+      _CaptureRequested = true;
+      return true;
+    }
+
+    float slop = 24 * _Density;
     Hit best = null;
     float bestArea = Float.MAX_VALUE;
     for (Hit hit : _Hits) {
@@ -654,13 +670,15 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       }
     }
 
-    if (best == null) {
-      return false;
+    if (best != null && best != _Selected) {
+      _UserSelectedKey = best.key;
+      _Selected = best;
+      drawOverlay();
+    } else if (_Selected != null) {
+      deliverBarcode(_Selected.barcode);
+    } else {
+      showNoBarcodeFound();
     }
-
-    _UserSelectedKey = best.key;
-    _Selected = best;
-    drawOverlay();
     return true;
   }
 

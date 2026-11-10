@@ -579,14 +579,21 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     [self renderHits];
 }
 
-// Lets the user select another highlighted barcode by tapping on it.
-- (BOOL)selectHitAtPoint:(CGPoint)point {
+// Tapping the target area captures the barcode. In highlight mode, tapping another outlined barcode
+// selects it instead; tapping the selected barcode (or empty space in the target area) returns it.
+- (void)handleTargetTap:(CGPoint)point {
+    if (!self.highlightBarcode) {
+        if (self.captureButton) {
+            self.captureRequested = YES;
+        }
+        return;
+    }
+
     NSDictionary *best = nil;
     CGFloat bestArea = CGFLOAT_MAX;
     for (NSDictionary *hit in self.hits) {
-        CGRect r = CGRectInset([hit[@"rect"] CGRectValue], -24, -24);
-        if (CGRectContainsPoint(r, point)) {
-            CGRect own = [hit[@"rect"] CGRectValue];
+        CGRect own = [hit[@"rect"] CGRectValue];
+        if (CGRectContainsPoint(CGRectInset(own, -24, -24), point)) {
             CGFloat area = own.size.width * own.size.height;
             if (area < bestArea) {
                 bestArea = area;
@@ -594,13 +601,16 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             }
         }
     }
-    if (best == nil) {
-        return NO;
+
+    if (best != nil && best != self.selectedHit) {
+        self.userSelectedKey = best[@"key"];
+        self.selectedHit = best;
+        [self renderHits];
+    } else if (self.selectedHit != nil) {
+        [self finishWithBarcode:self.selectedHit[@"barcode"]];
+    } else {
+        [self showNoBarcodeMessage];
     }
-    self.userSelectedKey = best[@"key"];
-    self.selectedHit = best;
-    [self renderHits];
-    return YES;
 }
 
 - (void)renderHits {
@@ -677,9 +687,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 - (void)focusAtPoint:(id) sender {
     NSLog(@"captured touch");
     CGPoint touchPoint = [(UITapGestureRecognizer*)sender locationInView:self.view];
-    if (self.highlightBarcode) {
-        [self selectHitAtPoint:touchPoint];
-    }
+    [self handleTargetTap:touchPoint];
     double focus_x = touchPoint.x/self.previewLayer.frame.size.width;
     double focus_y = (touchPoint.y+66)/self.previewLayer.frame.size.height;
 
