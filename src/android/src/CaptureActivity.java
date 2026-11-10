@@ -107,6 +107,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
   }
 
   private final List<Hit> _Hits = new ArrayList<>();
+  private final java.util.Map<String, RectF> _PreviousBounds = new java.util.HashMap<>();
   private Hit _Selected;
   private String _UserSelectedKey;
 
@@ -577,7 +578,26 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
         hit.bounds.right = Math.max(hit.bounds.right, x);
         hit.bounds.bottom = Math.max(hit.bounds.bottom, y);
       }
+
+      // Always outline an upright rectangle (the corner points of a skewed or tilted detection
+      // would otherwise form an irregular shape) and smooth it to stop it from jumping around.
+      RectF previous = _PreviousBounds.get(hit.key);
+      if (previous != null && Math.hypot(hit.bounds.centerX() - previous.centerX(),
+          hit.bounds.centerY() - previous.centerY()) < Math.max(hit.bounds.width(), hit.bounds.height())) {
+        hit.bounds.left = previous.left + (hit.bounds.left - previous.left) * 0.5f;
+        hit.bounds.top = previous.top + (hit.bounds.top - previous.top) * 0.5f;
+        hit.bounds.right = previous.right + (hit.bounds.right - previous.right) * 0.5f;
+        hit.bounds.bottom = previous.bottom + (hit.bounds.bottom - previous.bottom) * 0.5f;
+      }
+      hit.points = new PointF[] { new PointF(hit.bounds.left, hit.bounds.top),
+          new PointF(hit.bounds.right, hit.bounds.top), new PointF(hit.bounds.right, hit.bounds.bottom),
+          new PointF(hit.bounds.left, hit.bounds.bottom) };
       _Hits.add(hit);
+    }
+
+    _PreviousBounds.clear();
+    for (Hit hit : _Hits) {
+      _PreviousBounds.put(hit.key, new RectF(hit.bounds));
     }
 
     // Keep the barcode the user selected as long as it is still visible,

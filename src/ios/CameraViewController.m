@@ -48,6 +48,7 @@
 @property(nonatomic, strong) NSArray<NSDictionary *> *hits;
 @property(nonatomic, strong) NSDictionary *selectedHit;
 @property(nonatomic, copy) NSString *userSelectedKey;
+@property(nonatomic, strong) NSDictionary<NSString *, NSValue *> *previousRects;
 
 @end
 
@@ -518,7 +519,34 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 // Keeps the barcode the user selected as long as it is still visible,
 // otherwise preselects the one closest to the center of the target area.
-- (void)updateHits:(NSArray<NSDictionary *> *)hits {
+- (void)updateHits:(NSArray<NSDictionary *> *)detected {
+    // Always outline an upright rectangle (the corner points of a skewed or tilted detection
+    // would otherwise form an irregular shape) and smooth it to stop it from jumping around.
+    NSMutableArray<NSDictionary *> *hits = [NSMutableArray array];
+    NSMutableDictionary<NSString *, NSValue *> *rects = [NSMutableDictionary dictionary];
+    for (NSDictionary *hit in detected) {
+        CGRect r = [hit[@"rect"] CGRectValue];
+        NSValue *previousValue = self.previousRects[hit[@"key"]];
+        if (previousValue != nil) {
+            CGRect p = previousValue.CGRectValue;
+            if (hypot(CGRectGetMidX(r) - CGRectGetMidX(p), CGRectGetMidY(r) - CGRectGetMidY(p)) < MAX(r.size.width, r.size.height)) {
+                r = CGRectMake(p.origin.x + (r.origin.x - p.origin.x) * 0.5,
+                               p.origin.y + (r.origin.y - p.origin.y) * 0.5,
+                               p.size.width + (r.size.width - p.size.width) * 0.5,
+                               p.size.height + (r.size.height - p.size.height) * 0.5);
+            }
+        }
+        NSArray<NSValue *> *points = @[[NSValue valueWithCGPoint:CGPointMake(CGRectGetMinX(r), CGRectGetMinY(r))],
+                                       [NSValue valueWithCGPoint:CGPointMake(CGRectGetMaxX(r), CGRectGetMinY(r))],
+                                       [NSValue valueWithCGPoint:CGPointMake(CGRectGetMaxX(r), CGRectGetMaxY(r))],
+                                       [NSValue valueWithCGPoint:CGPointMake(CGRectGetMinX(r), CGRectGetMaxY(r))]];
+        NSMutableDictionary *updated = [hit mutableCopy];
+        updated[@"rect"] = [NSValue valueWithCGRect:r];
+        updated[@"points"] = points;
+        [hits addObject:updated];
+        rects[hit[@"key"]] = [NSValue valueWithCGRect:r];
+    }
+    self.previousRects = rects;
     self.hits = hits;
 
     NSDictionary *selected = nil;
