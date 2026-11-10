@@ -503,13 +503,12 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
   /** The area (in view coordinates) in which barcodes are scanned. */
   private RectF getTargetRect(float viewWidth, float viewHeight) {
-    // The size is relative to the view width, so the target area scales proportionally when the
-    // device is rotated to landscape. If it does not fit, it is scaled down keeping its proportions.
-    float width = (float) (DetectorSize * viewWidth);
-    float height = (float) ((DetectorHeight > 0 ? DetectorHeight : DetectorSize) * viewWidth);
-    float fit = Math.min(1f, Math.min(viewWidth / width, viewHeight / height));
-    width *= fit;
-    height *= fit;
+    // The width is relative to the view width, so it grows when the device is rotated to landscape.
+    // The height is relative to the smaller view dimension, so it keeps its portrait size.
+    float width = Math.min((float) (DetectorSize * viewWidth), viewWidth);
+    float height = Math.min(
+        (float) ((DetectorHeight > 0 ? DetectorHeight : DetectorSize) * Math.min(viewWidth, viewHeight)),
+        viewHeight);
     return new RectF(viewWidth / 2 - width / 2, viewHeight / 2 - height / 2, viewWidth / 2 + width / 2,
         viewHeight / 2 + height / 2);
   }
