@@ -35,6 +35,10 @@
 @property(nonatomic, strong) UIButton *torchButton;
 @property(atomic, assign) BOOL captureRequested;
 @property(atomic, assign) BOOL processingFrame;
+@property(nonatomic, strong) UILabel *targetView;
+@property(nonatomic, strong) CAShapeLayer *aidLayer;
+@property(nonatomic, strong) UIButton *cancelButton;
+@property(nonatomic, strong) UIButton *captureActionButton;
 @property(atomic, assign) BOOL finished;
 @property(nonatomic, strong) CIContext *ciContext;
 
@@ -67,11 +71,11 @@
 
 - (BOOL) shouldAutorotate
 {
-    return NO;
+    return YES;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskPortrait;
+    return UIInterfaceOrientationMaskAll;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -100,6 +104,7 @@
 
     // Set up camera preview.
     [self setUpCameraPreview];
+    [self updateVideoOrientation];
 
     //Parse Cordova settings.
     NSNumber *formats = 0;
@@ -125,6 +130,16 @@
     self.previewLayer.frame = self.view.layer.bounds;
     self.previewLayer.position = CGPointMake(CGRectGetMidX(self.previewLayer.frame),
                                              CGRectGetMidY(self.previewLayer.frame));
+
+    [self layoutOverlay];
+    [self updateVideoOrientation];
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self updateVideoOrientation];
+    }];
 }
 
 - (void)dealloc {
@@ -150,11 +165,6 @@
         alert.preferredAction = primaryAction;
         [self presentViewController:alert animated:YES completion:nil];
     } else {
-        //Force portrait orientation.
-        [[UIDevice currentDevice] setValue:
-         [NSNumber numberWithInteger: UIInterfaceOrientationPortrait]
-                                    forKey:@"orientation"];
-        
         [self.session startRunning];
     }
 }
@@ -339,45 +349,25 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     self.previewLayer.frame = self.view.superview.bounds;
     [self.view.layer addSublayer:self.previewLayer];
 
-    CGRect screenRect = [[UIScreen mainScreen] bounds];
-    CGFloat screenWidth = screenRect.size.width;
-    CGFloat screenHeight = screenRect.size.height;
-
-    // The target area is a rectangle: detectorSize is its width and detectorHeight its height,
-    // both relative to the smaller screen dimension. Without detectorHeight it is a square.
-    CGFloat baseSize = MIN(screenWidth, screenHeight);
-    CGFloat frameWidth = MIN(baseSize * _detectorSize, screenWidth);
-    CGFloat frameHeight = MIN(baseSize * (_detectorHeight > 0 ? _detectorHeight : _detectorSize), screenHeight);
-    self.viewSize = CGSizeMake(screenWidth, screenHeight);
-    self.targetRect = CGRectMake(screenWidth/2 - frameWidth/2, screenHeight/2 - frameHeight/2, frameWidth, frameHeight);
-
     UILabel* _label1 = [[UILabel alloc] init];
-    _label1.frame = CGRectMake(screenWidth/2 - frameWidth/2, screenHeight/2 - frameHeight/2, frameWidth, frameHeight);
+    self.targetView = _label1;
     _label1.layer.masksToBounds = NO;
-    _label1.layer.cornerRadius = MIN(30.0, frameHeight / 4.0);
     _label1.userInteractionEnabled = YES;
     _label1.layer.borderColor = [UIColor whiteColor].CGColor;
     _label1.layer.borderWidth = 3.0;
 
     // Targeting aid: horizontal line through the vertical center of the target area
-    // with a small vertical tick at its center.
-    UIBezierPath *aidPath = [UIBezierPath bezierPath];
-    [aidPath moveToPoint:CGPointMake(0, frameHeight/2)];
-    [aidPath addLineToPoint:CGPointMake(frameWidth, frameHeight/2)];
-    [aidPath moveToPoint:CGPointMake(frameWidth/2, frameHeight/2 - 10)];
-    [aidPath addLineToPoint:CGPointMake(frameWidth/2, frameHeight/2 + 10)];
-    CAShapeLayer *aidLayer = [CAShapeLayer layer];
-    aidLayer.path = aidPath.CGPath;
-    aidLayer.strokeColor = [UIColor redColor].CGColor;
-    aidLayer.lineWidth = 2.0;
-    [_label1.layer addSublayer:aidLayer];
+    // with a small vertical tick at its center (the path is set in layoutOverlay).
+    self.aidLayer = [CAShapeLayer layer];
+    self.aidLayer.strokeColor = [UIColor redColor].CGColor;
+    self.aidLayer.lineWidth = 2.0;
+    [_label1.layer addSublayer:self.aidLayer];
 
     UITapGestureRecognizer* tapScanner = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(focusAtPoint:)];
     [_label1 addGestureRecognizer:tapScanner];
 
-    CGFloat buttonSize = 45.0;
-
     UIButton *_cancelButton = [[UIButton alloc] init];
+    self.cancelButton = _cancelButton;
     [_cancelButton addTarget:self
                       action:@selector(closeView:)
             forControlEvents:UIControlEventTouchUpInside];
@@ -390,13 +380,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     [_cancelButton setImage:cancelIcon
                    forState:UIControlStateNormal];
 
-    CGFloat screenOffset = MAX(16.0, (screenWidth/2 - frameWidth/2)/2 - buttonSize/2);
-    NSLog(@"screenOffset %f", screenOffset);
-
-    _cancelButton.frame = CGRectMake(screenOffset, screenHeight-screenOffset-buttonSize, buttonSize, buttonSize);
     _cancelButton.backgroundColor = [UIColor colorWithWhite:1 alpha:0.4];
-    _cancelButton.transform=CGAffineTransformMakeRotation(M_PI / 2);
-    _cancelButton.layer.cornerRadius = buttonSize/2;
+    _cancelButton.layer.cornerRadius = 45.0/2;
     _cancelButton.contentEdgeInsets = UIEdgeInsetsMake(15, 15, 15, 15);
 
     [self.view addSubview:_cancelButton];
@@ -417,10 +402,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     [self.torchButton setImage:torchIcon
                       forState:UIControlStateNormal];
 
-    self.torchButton.frame = CGRectMake(screenWidth-screenOffset-buttonSize, screenHeight-screenOffset-buttonSize, buttonSize, buttonSize);
     self.torchButton.backgroundColor = [UIColor colorWithWhite:1 alpha:0.4];
-    self.torchButton.transform=CGAffineTransformMakeRotation(M_PI / 2);
-    self.torchButton.layer.cornerRadius = buttonSize/2;
+    self.torchButton.layer.cornerRadius = 45.0/2;
     self.torchButton.contentEdgeInsets = UIEdgeInsetsMake(10, 10, 10, 10);
 
     [self.view addSubview:self.torchButton];
@@ -428,9 +411,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     // Highlight mode needs a button to confirm the selected barcode.
     if ((self.captureButton || self.highlightBarcode) && self.showCaptureButton) {
         CGFloat captureSize = 72.0;
-        UIButton *captureButton = [[UIButton alloc] initWithFrame:CGRectMake(screenWidth/2 - captureSize/2,
-                                                                            screenHeight-screenOffset-buttonSize/2-captureSize/2,
-                                                                            captureSize, captureSize)];
+        UIButton *captureButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, captureSize, captureSize)];
+        self.captureActionButton = captureButton;
         captureButton.backgroundColor = [UIColor colorWithWhite:1 alpha:0.25];
         captureButton.layer.cornerRadius = captureSize/2;
         captureButton.layer.borderColor = [UIColor whiteColor].CGColor;
@@ -451,19 +433,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
     self.imageView = [[UIImageView alloc] initWithImage:nil];
 
-    UIView *catView = [[UIView alloc] initWithFrame:CGRectMake(0,0,frameWidth,frameHeight)];
-    self.imageView.frame = catView.bounds;
-
-    // add the imageview to the superview
-    [catView addSubview:self.imageView];
-
-    //add the view to the main view
-
-    [self.view addSubview:catView];
-
     if (self.highlightBarcode) {
         self.highlightLayer = [CALayer layer];
-        self.highlightLayer.frame = CGRectMake(0, 0, screenWidth, screenHeight);
         [self.view.layer addSublayer:self.highlightLayer];
 
         self.valueLabel = [[UILabel alloc] init];
@@ -479,6 +450,106 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         [self.view addSubview:self.valueLabel];
     }
 
+    [self layoutOverlay];
+}
+
+// Positions the target area and the buttons for the current view size, so everything adapts to rotation.
+// The width of the target area is relative to the view width (it grows in landscape),
+// its height is relative to the smaller view dimension (it keeps its portrait height).
+- (void)layoutOverlay {
+    CGSize size = self.view.bounds.size;
+    if (size.width == 0 || size.height == 0 || self.targetView == nil) {
+        return;
+    }
+
+    CGFloat w = size.width;
+    CGFloat h = size.height;
+    BOOL portrait = h >= w;
+    UIEdgeInsets safe = self.view.safeAreaInsets;
+
+    CGFloat frameWidth = MIN(w * _detectorSize, w);
+    CGFloat frameHeight = MIN(MIN(w, h) * (_detectorHeight > 0 ? _detectorHeight : _detectorSize), h);
+
+    BOOL sizeChanged = !CGSizeEqualToSize(self.viewSize, size);
+    self.viewSize = size;
+    self.targetRect = CGRectMake(w/2 - frameWidth/2, h/2 - frameHeight/2, frameWidth, frameHeight);
+
+    self.targetView.frame = self.targetRect;
+    self.targetView.layer.cornerRadius = MIN(30.0, frameHeight / 4.0);
+
+    UIBezierPath *aidPath = [UIBezierPath bezierPath];
+    [aidPath moveToPoint:CGPointMake(0, frameHeight/2)];
+    [aidPath addLineToPoint:CGPointMake(frameWidth, frameHeight/2)];
+    [aidPath moveToPoint:CGPointMake(frameWidth/2, frameHeight/2 - 10)];
+    [aidPath addLineToPoint:CGPointMake(frameWidth/2, frameHeight/2 + 10)];
+    self.aidLayer.frame = self.targetView.bounds;
+    self.aidLayer.path = aidPath.CGPath;
+
+    CGFloat buttonSize = 45.0;
+    CGFloat screenOffset = MAX(16.0, (w/2 - frameWidth/2)/2 - buttonSize/2);
+    CGFloat centerY = h - screenOffset - buttonSize/2;
+    CGAffineTransform iconTransform = portrait ? CGAffineTransformMakeRotation(M_PI / 2) : CGAffineTransformIdentity;
+
+    self.cancelButton.transform = CGAffineTransformIdentity;
+    self.cancelButton.bounds = CGRectMake(0, 0, buttonSize, buttonSize);
+    self.cancelButton.center = CGPointMake(safe.left + screenOffset + buttonSize/2, centerY);
+    self.cancelButton.transform = iconTransform;
+
+    self.torchButton.transform = CGAffineTransformIdentity;
+    self.torchButton.bounds = CGRectMake(0, 0, buttonSize, buttonSize);
+    self.torchButton.center = CGPointMake(w - safe.right - screenOffset - buttonSize/2, centerY);
+    self.torchButton.transform = iconTransform;
+
+    self.captureActionButton.center = CGPointMake(w/2, centerY);
+
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.highlightLayer.frame = CGRectMake(0, 0, w, h);
+    [CATransaction commit];
+
+    // Detected barcodes are in the coordinates of the previous size; wait for fresh detections.
+    if (sizeChanged && self.highlightBarcode) {
+        self.previousRects = nil;
+        self.selectedHit = nil;
+        [self updateHits:@[]];
+    }
+}
+
+- (UIInterfaceOrientation)currentInterfaceOrientation {
+    UIWindowScene *scene = self.view.window.windowScene;
+    if (scene != nil) {
+        return scene.interfaceOrientation;
+    }
+    CGSize size = self.view.bounds.size;
+    return size.width > size.height ? UIInterfaceOrientationLandscapeRight : UIInterfaceOrientationPortrait;
+}
+
+// Keeps the video frames and the preview upright for the current interface orientation.
+- (void)updateVideoOrientation {
+    UIInterfaceOrientation orientation = [self currentInterfaceOrientation];
+    [self applyOrientation:orientation toConnection:[self.videoDataOutput connectionWithMediaType:AVMediaTypeVideo]];
+    [self applyOrientation:orientation toConnection:self.previewLayer.connection];
+}
+
+- (void)applyOrientation:(UIInterfaceOrientation)orientation toConnection:(AVCaptureConnection *)connection {
+    if (connection == nil) {
+        return;
+    }
+    if (@available(iOS 17.0, *)) {
+        CGFloat angle = 90;
+        switch (orientation) {
+            case UIInterfaceOrientationLandscapeRight: angle = 0; break;
+            case UIInterfaceOrientationLandscapeLeft: angle = 180; break;
+            case UIInterfaceOrientationPortraitUpsideDown: angle = 270; break;
+            default: angle = 90; break;
+        }
+        if ([connection isVideoRotationAngleSupported:angle]) {
+            connection.videoRotationAngle = angle;
+        }
+    } else if (connection.isVideoOrientationSupported) {
+        // AVCaptureVideoOrientation uses the same values as UIInterfaceOrientation.
+        connection.videoOrientation = (AVCaptureVideoOrientation)orientation;
+    }
 }
 
 #pragma mark - Helper Functions
@@ -699,6 +770,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             if ([device position] == AVCaptureDevicePositionBack) {
                 NSLog(@"Device position : back");
                 CGPoint point = CGPointMake(focus_y, 1-focus_x);
+                if (self.viewSize.width > self.viewSize.height) {
+                    point = [self.previewLayer captureDevicePointOfInterestForPoint:touchPoint];
+                }
                 if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus] && [device lockForConfiguration:&error]){
                     [device setFocusPointOfInterest:point];
 

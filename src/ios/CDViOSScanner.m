@@ -46,8 +46,6 @@
 
     if (hasCamera)
     {
-        //Force portrait orientation.
-        [[UIDevice currentDevice] setValue: [NSNumber numberWithInteger: UIInterfaceOrientationPortrait] forKey:@"orientation"];
         dispatch_async(dispatch_get_main_queue(), ^{
             NSLog(@"Arguments %@", command.arguments);
             if (self->_scannerOpen == YES)
@@ -150,11 +148,7 @@
 
 - (void)resetOrientation
 {
-    if (_previousOrientation != UIInterfaceOrientationUnknown && _previousOrientation != UIInterfaceOrientationPortrait)
-    {
-        [[UIDevice currentDevice] setValue: [NSNumber numberWithInteger: _previousOrientation] forKey:@"orientation"];
-        NSLog(@"Changing device orientation to previous orientation");
-    }
+    // The scanner rotates with the device and the presenting view controller restores its own orientation.
 }
 
 

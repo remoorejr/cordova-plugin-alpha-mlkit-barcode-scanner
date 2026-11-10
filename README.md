@@ -119,7 +119,7 @@ in the viewfinder and taps the scan area (or the capture button, see `showCaptur
 
 `detectorHeight`: height of the scan area. `detectorSize` is the width of the scan area as a fraction of the
 screen width, `detectorHeight` its height as a fraction of the smaller screen dimension (e.g. `detectorSize: 0.9`
-and `detectorHeight: 0.3` gives a wide, flat rectangle). In landscape the scan area becomes wider with the screen
+and `detectorHeight: 0.3` gives a wide, flat rectangle). In landscape (Android and iOS) the scan area becomes wider with the screen
 but keeps its portrait height. The default `0` means "same as `detectorSize`" (a square in portrait).
 Only barcodes inside the scan area are read.
 
