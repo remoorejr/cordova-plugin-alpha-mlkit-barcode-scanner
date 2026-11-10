@@ -157,7 +157,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
     _CaptureButtonMode = _HighlightMode || getIntent().getBooleanExtra("CaptureButton", false);
     if (_CaptureButtonMode) {
       View captureButton = findViewById(getResources().getIdentifier("capture_button", "id", getPackageName()));
-      captureButton.setVisibility(getIntent().getBooleanExtra("ShowCaptureButton", true) ? View.VISIBLE : View.GONE);
+      captureButton.setVisibility(getIntent().getBooleanExtra("ShowCaptureButton", false) ? View.VISIBLE : View.GONE);
       captureButton.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -503,9 +503,13 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
 
   /** The area (in view coordinates) in which barcodes are scanned. */
   private RectF getTargetRect(float viewWidth, float viewHeight) {
-    float base = Math.min(viewWidth, viewHeight);
-    float width = Math.min((float) (DetectorSize * base), viewWidth);
-    float height = Math.min((float) ((DetectorHeight > 0 ? DetectorHeight : DetectorSize) * base), viewHeight);
+    // The size is relative to the view width, so the target area scales proportionally when the
+    // device is rotated to landscape. If it does not fit, it is scaled down keeping its proportions.
+    float width = (float) (DetectorSize * viewWidth);
+    float height = (float) ((DetectorHeight > 0 ? DetectorHeight : DetectorSize) * viewWidth);
+    float fit = Math.min(1f, Math.min(viewWidth / width, viewHeight / height));
+    width *= fit;
+    height *= fit;
     return new RectF(viewWidth / 2 - width / 2, viewHeight / 2 - height / 2, viewWidth / 2 + width / 2,
         viewHeight / 2 + height / 2);
   }

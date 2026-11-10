@@ -110,23 +110,22 @@ const defaultOptions = {
   captureButton: false,
   detectorHeight: 0,
   highlightBarcode: false,
-  showCaptureButton: true,
+  showCaptureButton: false,
 };
 ```
 
-`captureButton`: when `true`, a capture button is shown at the bottom of the scanner.
-Barcodes are no longer scanned automatically; the user lines up the barcode in the viewfinder
-and taps the scan area or the button to scan it. If no barcode is found, a short message is shown and the user can try again.
+`captureButton`: when `true`, barcodes are no longer scanned automatically. The user lines up the barcode
+in the viewfinder and taps the scan area (or the capture button, see `showCaptureButton`) to scan it. If no barcode is found, a short message is shown and the user can try again.
 
 `detectorHeight`: height of the scan area. `detectorSize` is the width of the scan area and
-`detectorHeight` its height, both as a fraction of the smaller screen dimension (e.g. `detectorSize: 0.9`
+`detectorHeight` its height, both as a fraction of the screen width, so the scan area scales proportionally in landscape (if it does not fit it is scaled down keeping its proportions) (e.g. `detectorSize: 0.9`
 and `detectorHeight: 0.3` gives a wide, flat rectangle). The default `0` means "same as `detectorSize`" (a square).
 Only barcodes inside the scan area are read.
 
 `highlightBarcode`: when `true`, all barcodes inside the scan area are outlined and the one that will be
 returned is highlighted in green and its value is shown above it. By default it is the barcode closest to the
 center of the scan area. If it is not the right one, tap another outlined barcode to select it instead.
-Tap the selected barcode, or anywhere else in the scan area, (or the capture button, shown automatically in this mode) to return the selected barcode.
+Tap the selected barcode, or anywhere else in the scan area, (or the capture button, if `showCaptureButton` is `true`) to return the selected barcode.
 Example for a page full of barcodes:
 
 ```javascript
@@ -137,8 +136,8 @@ cordova.plugins.mlkit.barcodeScanner.scan(
 );
 ```
 
-`showCaptureButton`: whether the capture button is shown at the bottom of the scanner when `captureButton`
-or `highlightBarcode` is enabled. Set it to `false` to capture only by tapping the scan area.
+`showCaptureButton` (default `false`): whether a capture button is shown at the bottom of the scanner when `captureButton`
+or `highlightBarcode` is enabled. Without it, capture by tapping the scan area.
 
 ### Output/Return value
 

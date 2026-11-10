@@ -123,7 +123,7 @@ public class MLKitBarcodeScanner extends CordovaPlugin {
     intent.putExtra("RotateCamera", config.optBoolean("rotateCamera", false));
     intent.putExtra("CaptureButton", config.optBoolean("captureButton", false));
     intent.putExtra("DetectorHeight", config.optDouble("detectorHeight", 0));
-    intent.putExtra("ShowCaptureButton", config.optBoolean("showCaptureButton", true));
+    intent.putExtra("ShowCaptureButton", config.optBoolean("showCaptureButton", false));
     intent.putExtra("HighlightBarcode", config.optBoolean("highlightBarcode", false));
 
     _BeepOnSuccess = config.optBoolean("beepOnSuccess", false);

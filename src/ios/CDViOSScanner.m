@@ -76,7 +76,7 @@
                 self.cameraViewController.detectorSize = (CGFloat)[[config valueForKey:@"detectorSize"] ?: @0.5 floatValue];
                 self.cameraViewController.captureButton = [[config valueForKey:@"captureButton"] boolValue];
                 self.cameraViewController.detectorHeight = (CGFloat)[[config valueForKey:@"detectorHeight"] ?: @0 floatValue];
-                self.cameraViewController.showCaptureButton = [config valueForKey:@"showCaptureButton"] != nil ? [[config valueForKey:@"showCaptureButton"] boolValue] : YES;
+                self.cameraViewController.showCaptureButton = [[config valueForKey:@"showCaptureButton"] boolValue];
                 self.cameraViewController.highlightBarcode = [[config valueForKey:@"highlightBarcode"] boolValue];
                 self.cameraViewController.modalPresentationStyle = UIModalPresentationFullScreen;
 
