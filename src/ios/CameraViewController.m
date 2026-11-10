@@ -38,6 +38,7 @@
 @property(nonatomic, strong) UILabel *targetView;
 @property(nonatomic, strong) CAShapeLayer *aidLayer;
 @property(nonatomic, strong) UIButton *cancelButton;
+@property(nonatomic, strong) AVCaptureDevice *captureDevice;
 @property(nonatomic, strong) UIButton *captureActionButton;
 @property(atomic, assign) BOOL finished;
 @property(nonatomic, strong) CIContext *ciContext;
@@ -166,6 +167,7 @@
         [self presentViewController:alert animated:YES completion:nil];
     } else {
         [self.session startRunning];
+        [self focusOnTargetArea];
     }
 }
 
@@ -507,6 +509,10 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     self.highlightLayer.frame = CGRectMake(0, 0, w, h);
     [CATransaction commit];
 
+    if (sizeChanged) {
+        [self focusOnTargetArea];
+    }
+
     // Detected barcodes are in the coordinates of the previous size; wait for fresh detections.
     if (sizeChanged && self.highlightBarcode) {
         self.previousRects = nil;
@@ -759,48 +765,79 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     NSLog(@"captured touch");
     CGPoint touchPoint = [(UITapGestureRecognizer*)sender locationInView:self.view];
     [self handleTargetTap:touchPoint];
-    double focus_x = touchPoint.x/self.previewLayer.frame.size.width;
-    double focus_y = (touchPoint.y+66)/self.previewLayer.frame.size.height;
+    if (self.finished) {
+        return;
+    }
 
-    NSError *error;
-    NSArray *devices = [AVCaptureDevice devices];
-    for (AVCaptureDevice *device in devices){
-        NSLog(@"Device name: %@", [device localizedName]);
-        if ([device hasMediaType:AVMediaTypeVideo]) {
-            if ([device position] == AVCaptureDevicePositionBack) {
-                NSLog(@"Device position : back");
-                CGPoint point = CGPointMake(focus_y, 1-focus_x);
-                if (self.viewSize.width > self.viewSize.height) {
-                    point = [self.previewLayer captureDevicePointOfInterestForPoint:touchPoint];
-                }
-                if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus] && [device lockForConfiguration:&error]){
-                    [device setFocusPointOfInterest:point];
-
-                    for (UIView *subView in self.view.subviews)
-                    {
-                        if (subView.tag == 99)
-                        {
-                            [subView removeFromSuperview];
-                        }
-                    }
-
-                    CGRect rect = CGRectMake(touchPoint.x-30, touchPoint.y-30, 60, 60);
-                    UIView *focusRect = [[UIView alloc] initWithFrame:rect];
-                    focusRect.layer.borderColor = [UIColor colorWithRed:0.98 green:0.80 blue:0.18 alpha:.7].CGColor;
-                    focusRect.layer.borderWidth = 1;
-                    focusRect.tag = 99;
-                    [self.view addSubview:focusRect];
-
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                        [focusRect removeFromSuperview];
-                    });
-
-                    [device setFocusMode:AVCaptureFocusModeAutoFocus];
-                    [device unlockForConfiguration];
-                }
+    CGPoint point = [self.previewLayer captureDevicePointOfInterestForPoint:touchPoint];
+    if ([self focusAtDevicePoint:point]) {
+        for (UIView *subView in [self.view.subviews copy])
+        {
+            if (subView.tag == 99)
+            {
+                [subView removeFromSuperview];
             }
         }
+
+        CGRect rect = CGRectMake(touchPoint.x-30, touchPoint.y-30, 60, 60);
+        UIView *focusRect = [[UIView alloc] initWithFrame:rect];
+        focusRect.layer.borderColor = [UIColor colorWithRed:0.98 green:0.80 blue:0.18 alpha:.7].CGColor;
+        focusRect.layer.borderWidth = 1;
+        focusRect.userInteractionEnabled = NO;
+        focusRect.tag = 99;
+        [self.view addSubview:focusRect];
+
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            [focusRect removeFromSuperview];
+        });
     }
+}
+
+// Focuses (and keeps focusing continuously) on the given point, in capture device coordinates.
+- (BOOL)focusAtDevicePoint:(CGPoint)point {
+    AVCaptureDevice *device = self.captureDevice;
+    NSError *error = nil;
+    if (device == nil || ![device lockForConfiguration:&error]) {
+        NSLog(@"Could not lock the camera for focus: %@", error);
+        return NO;
+    }
+
+    if (device.isFocusPointOfInterestSupported) {
+        device.focusPointOfInterest = point;
+    }
+    if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
+        device.focusMode = AVCaptureFocusModeContinuousAutoFocus;
+    } else if ([device isFocusModeSupported:AVCaptureFocusModeAutoFocus]) {
+        device.focusMode = AVCaptureFocusModeAutoFocus;
+    }
+    if (device.isExposurePointOfInterestSupported) {
+        device.exposurePointOfInterest = point;
+    }
+    if ([device isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
+        device.exposureMode = AVCaptureExposureModeContinuousAutoExposure;
+    }
+    [device unlockForConfiguration];
+    return YES;
+}
+
+// Barcodes are scanned at close range, so keep the camera focusing on the center of the scan area.
+- (void)focusOnTargetArea {
+    if (self.captureDevice == nil || !self.session.isRunning || CGRectIsEmpty(self.targetRect)) {
+        return;
+    }
+
+    AVCaptureDevice *device = self.captureDevice;
+    NSError *error = nil;
+    if (![device lockForConfiguration:&error]) {
+        return;
+    }
+    if (device.isAutoFocusRangeRestrictionSupported) {
+        device.autoFocusRangeRestriction = AVCaptureAutoFocusRangeRestrictionNear;
+    }
+    [device unlockForConfiguration];
+
+    CGPoint center = CGPointMake(CGRectGetMidX(self.targetRect), CGRectGetMidY(self.targetRect));
+    [self focusAtDevicePoint:[self.previewLayer captureDevicePointOfInterestForPoint:center]];
 }
 static inline double radians (double degrees) {return degrees * M_PI/180;}
 - (UIImage*) rotateImage:(UIImage*)src toOrientation:(UIImageOrientation) orientation
@@ -891,11 +928,23 @@ static inline double radians (double degrees) {return degrees * M_PI/180;}
     } else {
         // Succeeded, set input and update connection states
         [self.session addInput:input];
+        self.captureDevice = input.device;
     }
     [self.session commitConfiguration];
 }
 
 - (AVCaptureDeviceInput *)captureDeviceInputForPosition:(AVCaptureDevicePosition)desiredPosition {
+    AVCaptureDevice *preferred = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera
+                                                                    mediaType:AVMediaTypeVideo
+                                                                     position:desiredPosition];
+    if (preferred != nil) {
+        NSError *preferredError = nil;
+        AVCaptureDeviceInput *preferredInput = [AVCaptureDeviceInput deviceInputWithDevice:preferred error:&preferredError];
+        if (preferredError == nil && [self.session canAddInput:preferredInput]) {
+            return preferredInput;
+        }
+    }
+
     for (AVCaptureDevice *device in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
         if (device.position == desiredPosition) {
             NSError *error = nil;

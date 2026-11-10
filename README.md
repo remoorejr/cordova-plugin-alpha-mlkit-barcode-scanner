@@ -12,6 +12,9 @@ The MLKit library is incredibly performant and fast in comparison to any other b
 | `cordova-android` | `>=14.0.0` | compileSdk 35+, 16 KB page size |
 | `cordova-ios`     | `>=7.0.0`  | GoogleMLKit pod 7.0, iOS 15.5+    |
 
+On iOS the ML Kit pods require iOS 15.5 or higher. If needed, set it in your `config.xml`:
+`<preference name="deployment-target" value="15.5" />`
+
 On iOS the camera usage text can be set at install time:
 `cordova plugin add cordova-plugin-mlkit-barcode-scanner --variable CAMERA_USAGE_DESCRIPTION="Scan barcodes"`
 
