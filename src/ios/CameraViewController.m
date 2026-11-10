@@ -357,6 +357,20 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     _label1.userInteractionEnabled = YES;
     _label1.layer.borderColor = [UIColor whiteColor].CGColor;
     _label1.layer.borderWidth = 3.0;
+
+    // Targeting aid: horizontal line through the vertical center of the target area
+    // with a small vertical tick at its center.
+    UIBezierPath *aidPath = [UIBezierPath bezierPath];
+    [aidPath moveToPoint:CGPointMake(0, frameHeight/2)];
+    [aidPath addLineToPoint:CGPointMake(frameWidth, frameHeight/2)];
+    [aidPath moveToPoint:CGPointMake(frameWidth/2, frameHeight/2 - 10)];
+    [aidPath addLineToPoint:CGPointMake(frameWidth/2, frameHeight/2 + 10)];
+    CAShapeLayer *aidLayer = [CAShapeLayer layer];
+    aidLayer.path = aidPath.CGPath;
+    aidLayer.strokeColor = [UIColor redColor].CGColor;
+    aidLayer.lineWidth = 2.0;
+    [_label1.layer addSublayer:aidLayer];
+
     UITapGestureRecognizer* tapScanner = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(focusAtPoint:)];
     [_label1 addGestureRecognizer:tapScanner];
 

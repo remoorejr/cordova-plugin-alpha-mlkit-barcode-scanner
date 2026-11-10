@@ -79,6 +79,7 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
   private SurfaceHolder holder;
   private SurfaceView surfaceView;
   private Paint _TargetPaint;
+  private Paint _CenterLinePaint;
   private Paint _HitPaint;
   private Paint _SelectedPaint;
   private Paint _SelectedFillPaint;
@@ -469,6 +470,11 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
     _TargetPaint.setColor(Color.WHITE);
     _TargetPaint.setStrokeWidth(5);
 
+    _CenterLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    _CenterLinePaint.setStyle(Paint.Style.STROKE);
+    _CenterLinePaint.setColor(Color.RED);
+    _CenterLinePaint.setStrokeWidth(2 * _Density);
+
     _HitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     _HitPaint.setStyle(Paint.Style.STROKE);
     _HitPaint.setColor(Color.parseColor("#FFC107"));
@@ -665,6 +671,14 @@ public class CaptureActivity extends AppCompatActivity implements SurfaceHolder.
       } else {
         canvas.drawRoundRect(target, radius, radius, _TargetPaint);
       }
+
+      // Targeting aid: horizontal line through the vertical center of the target area
+      // with a small vertical tick at its center.
+      float centerX = target.centerX();
+      float centerY = target.centerY();
+      float tick = 10 * _Density;
+      canvas.drawLine(target.left, centerY, target.right, centerY, _CenterLinePaint);
+      canvas.drawLine(centerX, centerY - tick, centerX, centerY + tick, _CenterLinePaint);
 
       if (_HighlightMode) {
         for (Hit hit : _Hits) {
