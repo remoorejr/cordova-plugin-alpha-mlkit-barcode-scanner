@@ -117,9 +117,10 @@ const defaultOptions = {
 `captureButton`: when `true`, barcodes are no longer scanned automatically. The user lines up the barcode
 in the viewfinder and taps the scan area (or the capture button, see `showCaptureButton`) to scan it. If no barcode is found, a short message is shown and the user can try again.
 
-`detectorHeight`: height of the scan area. `detectorSize` is the width of the scan area and
-`detectorHeight` its height, `detectorSize` as a fraction of the screen width and `detectorHeight` as a fraction of the smaller screen dimension. In landscape the scan area therefore becomes wider but keeps its portrait height (e.g. `detectorSize: 0.9`
-and `detectorHeight: 0.3` gives a wide, flat rectangle). The default `0` means "same as `detectorSize`" (a square).
+`detectorHeight`: height of the scan area. `detectorSize` is the width of the scan area as a fraction of the
+screen width, `detectorHeight` its height as a fraction of the smaller screen dimension (e.g. `detectorSize: 0.9`
+and `detectorHeight: 0.3` gives a wide, flat rectangle). In landscape the scan area becomes wider with the screen
+but keeps its portrait height. The default `0` means "same as `detectorSize`" (a square in portrait).
 Only barcodes inside the scan area are read.
 
 `highlightBarcode`: when `true`, all barcodes inside the scan area are outlined and the one that will be
