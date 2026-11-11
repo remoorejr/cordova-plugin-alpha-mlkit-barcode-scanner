@@ -198,6 +198,21 @@ npm run build
 The built `www/` folder is committed to the repository so the plugin can be installed straight from git.
 Run `npm run build` and commit `www/` after changing anything in `src-typescript/`.
 
+### README.pdf
+
+`README.pdf` is generated from `README.md` (it needs Microsoft Edge or Google Chrome installed; set `PDF_BROWSER` to a browser executable if none is found).
+Rebuild it by hand with:
+
+```shell
+npm run build:readme-pdf
+```
+
+To rebuild and stage it automatically whenever `README.md` is part of a commit, enable the included git hook once per clone:
+
+```shell
+npm run setup-hooks
+```
+
 ## Run the test app
 
 Install cordova:

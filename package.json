@@ -24,7 +24,9 @@
     "build": "npm run clean && npm run transpile",
     "clean": "node -e \"require('fs').rmSync('www',{recursive:true,force:true})\"",
     "transpile": "rollup --config --silent",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:readme-pdf": "node scripts/build-readme-pdf.js",
+    "setup-hooks": "git config core.hooksPath .githooks"
   },
   "files": [
     "/src/",
@@ -43,6 +45,7 @@
     "@rollup/plugin-typescript": "^8.5.0",
     "@types/cordova": "0.0.34",
     "@types/node": "^20.19.43",
+    "marked": "^12.0.2",
     "rollup": "2.79.2",
     "tslib": "2.6.3",
     "typescript": "^5.4.5"

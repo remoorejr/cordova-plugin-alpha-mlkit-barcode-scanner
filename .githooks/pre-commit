@@ -1,0 +1,13 @@
+#!/bin/sh
+# Rebuilds README.pdf whenever README.md is part of the commit.
+# Enable once per clone with: npm run setup-hooks
+
+if git diff --cached --name-only | grep -qx 'README.md'; then
+  if node scripts/build-readme-pdf.js; then
+    git add README.pdf
+  else
+    echo "warning: README.pdf was not rebuilt (see the message above); run 'npm run build:readme-pdf' manually"
+  fi
+fi
+
+exit 0
