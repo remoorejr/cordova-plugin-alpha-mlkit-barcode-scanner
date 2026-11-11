@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="cordova-plugin-mlkit-barcode-scanner"
-  version="4.1.9"
+  version="4.1.10"
   xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android">
   <name>cordova-plugin-mlkit-barcode-scanner</name>
@@ -43,6 +43,11 @@
       parent="NSCameraUsageDescription">
       <string>$CAMERA_USAGE_DESCRIPTION</string>
     </config-file>
+
+    <hook type="after_prepare"
+      src="hooks/ios-pods-deployment-target.js" />
+    <hook type="before_build"
+      src="hooks/ios-pods-deployment-target.js" />
 
     <framework src="Foundation.framework" />
     <framework src="AVFoundation.framework" />
