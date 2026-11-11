@@ -22,7 +22,7 @@ newest first. Everything below is on the `dev` branch.
   (`cordova.plugins.mlkit.barcodeScanner`) and the Java/Objective-C classes are unchanged.
 - **Migrating:** remove the old plugin first, then add the new one:
   `cordova plugin rm cordova-plugin-mlkit-barcode-scanner` and
-  `cordova plugin add https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner.git#dev`
+  `cordova plugin add https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner.git#dev`
   (the repository URL does not change with the plugin id).
 
 ## 4.1.10 (2026-11-11)

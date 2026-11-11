@@ -36,9 +36,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner.git"
+    "url": "https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner.git"
   },
-  "homepage": "https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner#readme",
+  "homepage": "https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "20.0.0",
     "@rollup/plugin-node-resolve": "13.0.4",
