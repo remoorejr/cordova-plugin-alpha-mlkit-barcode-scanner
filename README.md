@@ -24,14 +24,14 @@ The plugin includes a hook (`hooks/ios-pods-deployment-target.js`) that raises t
 run `cordova prepare ios` once first.
 
 On iOS the camera usage text can be set at install time:
-`cordova plugin add https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner.git#dev --variable CAMERA_USAGE_DESCRIPTION="Scan barcodes"`
+`cordova plugin add https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner.git#master --variable CAMERA_USAGE_DESCRIPTION="Scan barcodes"`
 
 ## Installation
 
 Run this command in your project root:
 
 ```bash
-npx cordova plugin add https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner.git#dev
+npx cordova plugin add https://github.com/remoorejr/cordova-plugin-alpha-mlkit-barcode-scanner.git#master
 ```
 
 If you installed the plugin under its previous name (`cordova-plugin-mlkit-barcode-scanner`), remove it first:
