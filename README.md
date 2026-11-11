@@ -7,24 +7,34 @@ The MLKit library is incredibly performant and fast in comparison to any other b
 
 ## Plugin Dependencies
 
-| Dependency        | Version    | Info                              |
-| ----------------- | ---------- | --------------------------------- |
-| `cordova-android` | `>=14.0.0` | compileSdk 35+, 16 KB page size |
-| `cordova-ios`     | `>=7.0.0`  | GoogleMLKit pod 7.0, iOS 15.5+    |
+| Dependency        | Version    | Info                                          |
+| ----------------- | ---------- | --------------------------------------------- |
+| `cordova`         | `>=11.0.0` |                                               |
+| `cordova-android` | `>=14.0.0` | compileSdk 35+, CameraX 1.4 (16 KB page size) |
+| `cordova-ios`     | `>=7.0.0`  | GoogleMLKit pod 9.0, iOS 15.5+                |
+
+`cordova-plugin-androidx` and `cordova-plugin-androidx-adapter` are not needed anymore.
 
 On iOS the ML Kit pods require iOS 15.5 or higher. If needed, set it in your `config.xml`:
 `<preference name="deployment-target" value="15.5" />`
 
+Some of the pods ML Kit depends on declare a deployment target below iOS 15, which current Xcode versions reject.
+The plugin includes a hook (`hooks/ios-pods-deployment-target.js`) that raises them to 15.0 automatically on
+`cordova prepare` and `cordova build`. If you build straight from Xcode after a fresh `pod install`,
+run `cordova prepare ios` once first.
+
 On iOS the camera usage text can be set at install time:
-`cordova plugin add cordova-plugin-mlkit-barcode-scanner --variable CAMERA_USAGE_DESCRIPTION="Scan barcodes"`
+`cordova plugin add https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner.git#dev --variable CAMERA_USAGE_DESCRIPTION="Scan barcodes"`
 
 ## Installation
 
 Run this command in your project root:
 
 ```bash
-npx cordova plugin add cordova-plugin-mlkit-barcode-scanner
+npx cordova plugin add https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner.git#dev
 ```
+
+See [CHANGES.md](CHANGES.md) for everything that changed compared to version 3.x.
 
 ## Supported Platforms
 
@@ -86,8 +96,11 @@ cordova.plugins.mlkit.barcodeScanner.scan(
 The default options are shown below.
 All values are optional.
 
-Note that the `detectorSize` value must be between `0` and `1`, because it determines how many percent of the screen should be covered by the detector.
-If the value is greater than 1 the detector will not be visible on the screen.
+Note that the `detectorSize` value must be between `0` and `1`, because it determines how many percent of the screen width should be covered by the scan area.
+If the value is greater than 1 the scan area will not be visible on the screen.
+
+The scan area is drawn as a white rectangle with a red horizontal line through its vertical center and a small red tick
+at the center of that line, as a visual targeting aid. Only barcodes inside the scan area are read.
 
 ```javascript
 const defaultOptions = {
@@ -116,6 +129,9 @@ const defaultOptions = {
   showCaptureButton: false,
 };
 ```
+
+By default a barcode is returned as soon as one is detected in the scan area.
+The options `captureButton` and `highlightBarcode` change this so that the user decides which barcode is returned.
 
 `captureButton`: when `true`, barcodes are no longer scanned automatically. The user lines up the barcode
 in the viewfinder and taps the scan area (or the capture button, see `showCaptureButton`) to scan it. If no barcode is found, a short message is shown and the user can try again.
@@ -172,22 +188,15 @@ This will rotate the camera stream by 180 degrees.
 This project uses npm scripts for building:
 
 ```shell
-# lint the project using eslint
-npm run lint
-
-# removes the generated folders
+# removes the generated www folder
 npm run clean
 
-# build the project
-# (includes clean and lint)
+# build the project (TypeScript to www/)
 npm run build
-
-# publish the project
-# (includes build)
-npm publish
 ```
 
-A VS Code task for `build` is also included.
+The built `www/` folder is committed to the repository so the plugin can be installed straight from git.
+Run `npm run build` and commit `www/` after changing anything in `src-typescript/`.
 
 ## Run the test app
 
