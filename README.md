@@ -1,4 +1,4 @@
-# :camera: cordova-plugin-mlkit-barcode-scanner
+# :camera: cordova-plugin-alpha-mlkit-barcode-scanner
 
 ## Purpose of this Project
 
@@ -32,6 +32,12 @@ Run this command in your project root:
 
 ```bash
 npx cordova plugin add https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner.git#dev
+```
+
+If you installed the plugin under its previous name (`cordova-plugin-mlkit-barcode-scanner`), remove it first:
+
+```bash
+npx cordova plugin rm cordova-plugin-mlkit-barcode-scanner
 ```
 
 See [CHANGES.md](CHANGES.md) for everything that changed compared to version 3.x.

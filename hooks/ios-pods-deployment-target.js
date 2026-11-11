@@ -11,7 +11,7 @@ var MIN_TARGET = 15.0;
 
 var POST_INSTALL = [
   '',
-  '# Added by cordova-plugin-mlkit-barcode-scanner: raise too low pod deployment targets',
+  '# Added by cordova-plugin-alpha-mlkit-barcode-scanner: raise too low pod deployment targets',
   'post_install do |installer|',
   '  installer.pods_project.targets.each do |target|',
   '    target.build_configurations.each do |config|',
@@ -48,7 +48,7 @@ function patchPodsProject(iosPath) {
   });
   if (patched !== content) {
     fs.writeFileSync(pbxproj, patched);
-    console.log('cordova-plugin-mlkit-barcode-scanner: raised pod deployment targets to ' + MIN_TARGET.toFixed(1));
+    console.log('cordova-plugin-alpha-mlkit-barcode-scanner: raised pod deployment targets to ' + MIN_TARGET.toFixed(1));
   }
 }
 

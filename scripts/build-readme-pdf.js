@@ -61,7 +61,7 @@ function renderHtml() {
     .replace(/:camera:/g, '\u{1F4F7}')
     .replace(/:information_source:/g, '\u2139\uFE0F');
 
-  return `<!doctype html><html><head><meta charset="utf-8"><title>cordova-plugin-mlkit-barcode-scanner</title>
+  return `<!doctype html><html><head><meta charset="utf-8"><title>cordova-plugin-alpha-mlkit-barcode-scanner</title>
 <style>${STYLE}</style></head><body>${marked.parse(markdown, { gfm: true })}</body></html>`;
 }
 

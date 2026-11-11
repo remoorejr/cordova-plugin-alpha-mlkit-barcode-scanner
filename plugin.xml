@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-plugin-mlkit-barcode-scanner"
-  version="4.1.10"
+<plugin id="cordova-plugin-alpha-mlkit-barcode-scanner"
+  version="5.0.0"
   xmlns="http://apache.org/cordova/ns/plugins/1.0"
   xmlns:android="http://schemas.android.com/apk/res/android">
-  <name>cordova-plugin-mlkit-barcode-scanner</name>
-  <js-module name="cordova-plugin-ml-kit-barcode-scanner"
+  <name>cordova-plugin-alpha-mlkit-barcode-scanner</name>
+  <js-module name="cordova-plugin-alpha-ml-kit-barcode-scanner"
     src="www/BarcodeScanner.plugin.js">
     <clobbers target="cordova.plugins.mlkit.barcodeScanner" />
   </js-module>
@@ -22,7 +22,7 @@
   <platform name="ios">
     <config-file parent="/*"
       target="config.xml">
-      <feature name="cordova-plugin-mlkit-barcode-scanner">
+      <feature name="cordova-plugin-alpha-mlkit-barcode-scanner">
         <param name="ios-package"
           value="CDViOSScanner" />
       </feature>
@@ -74,7 +74,7 @@
   <platform name="android">
     <config-file parent="/*"
       target="res/xml/config.xml">
-      <feature name="cordova-plugin-mlkit-barcode-scanner">
+      <feature name="cordova-plugin-alpha-mlkit-barcode-scanner">
         <param name="android-package"
           value="com.mobisys.cordova.plugins.mlkit.barcode.scanner.MLKitBarcodeScanner" />
       </feature>

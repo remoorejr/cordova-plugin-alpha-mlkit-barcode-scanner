@@ -1,6 +1,6 @@
 # Changes
 
-All changes made to this fork since version 3.0.7 of `cordova-plugin-mlkit-barcode-scanner`,
+All changes made to this fork since version 3.0.7 of the original `cordova-plugin-mlkit-barcode-scanner`,
 newest first. Everything below is on the `dev` branch.
 
 ## Upgrading from 3.x
@@ -14,6 +14,16 @@ newest first. Everything below is on the `dev` branch.
 - If several barcodes are inside the scan area without `highlightBarcode`, Android now returns the first
   one (it used to return the last).
 - On iOS the scanner is no longer locked to portrait; it rotates with the device if the app allows it.
+
+## 5.0.0 (2026-11-11)
+
+- **Renamed the plugin to `cordova-plugin-alpha-mlkit-barcode-scanner`.** This changes the plugin id, the npm
+  package name, the Cordova feature/service name and the name in `plugin.xml`. The JavaScript API
+  (`cordova.plugins.mlkit.barcodeScanner`) and the Java/Objective-C classes are unchanged.
+- **Migrating:** remove the old plugin first, then add the new one:
+  `cordova plugin rm cordova-plugin-mlkit-barcode-scanner` and
+  `cordova plugin add https://github.com/remoorejr/cordova-plugin-mlkit-barcode-scanner.git#dev`
+  (the repository URL does not change with the plugin id).
 
 ## 4.1.10 (2026-11-11)
 

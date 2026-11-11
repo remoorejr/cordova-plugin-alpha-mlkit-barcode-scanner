@@ -17,7 +17,7 @@
       "cordova-plugin-whitelist": {},
       "cordova-plugin-androidx": {},
       "cordova-plugin-androidx-adapter": {},
-      "cordova-plugin-mlkit-barcode-scanner": {}
+      "cordova-plugin-alpha-mlkit-barcode-scanner": {}
     },
     "platforms": [
       "android"
@@ -34,7 +34,7 @@
     "@rollup/plugin-node-resolve": "13.0.5",
     "cordova-android": "9.1.0",
     "cordova-ios": "6.2.0",
-    "cordova-plugin-mlkit-barcode-scanner": "file:../..",
+    "cordova-plugin-alpha-mlkit-barcode-scanner": "file:../..",
     "rollup": "2.57.0",
     "rollup-plugin-typescript2": "0.30.0"
   }
