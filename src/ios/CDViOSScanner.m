@@ -72,7 +72,8 @@
                 NSNumber* barcodeFormats = [config valueForKey:@"barcodeFormats"] ?: @1234;
                 self.cameraViewController.barcodeFormats = barcodeFormats;
                 self.cameraViewController.detectorSize = (CGFloat)[[config valueForKey:@"detectorSize"] ?: @0.5 floatValue];
-                self.cameraViewController.captureButton = [[config valueForKey:@"captureButton"] boolValue];
+                // Tap-to-capture is the default; autoScan restores automatic scanning unless a capture button was requested.
+                self.cameraViewController.captureButton = [[config valueForKey:@"captureButton"] boolValue] || ![[config valueForKey:@"autoScan"] boolValue];
                 self.cameraViewController.detectorHeight = (CGFloat)[[config valueForKey:@"detectorHeight"] ?: @0 floatValue];
                 self.cameraViewController.showCaptureButton = [[config valueForKey:@"showCaptureButton"] boolValue];
                 self.cameraViewController.highlightBarcode = [[config valueForKey:@"highlightBarcode"] boolValue];

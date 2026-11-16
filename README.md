@@ -133,14 +133,20 @@ const defaultOptions = {
   detectorHeight: 0,
   highlightBarcode: false,
   showCaptureButton: false,
+  autoScan: false,
 };
 ```
 
-By default a barcode is returned as soon as one is detected in the scan area.
-The options `captureButton` and `highlightBarcode` change this so that the user decides which barcode is returned.
+By default the user decides when to scan: line up the barcode in the scan area and tap the scan area to capture it.
+If no barcode is found, a short message is shown and the user can try again. Set `autoScan: true` to return a barcode
+as soon as one is detected instead. The options `captureButton` and `highlightBarcode` also let the user decide which
+barcode is returned.
 
-`captureButton`: when `true`, barcodes are no longer scanned automatically. The user lines up the barcode
-in the viewfinder and taps the scan area (or the capture button, see `showCaptureButton`) to scan it. If no barcode is found, a short message is shown and the user can try again.
+`autoScan` (default `false`): when `true`, a barcode is returned as soon as one is detected in the scan area, without
+a tap. `autoScan` is ignored (the user has to tap) when `captureButton` or `highlightBarcode` is `true`.
+
+`captureButton`: when `true`, the user always has to tap to scan, even if `autoScan` is `true`. The user lines up the
+barcode in the viewfinder and taps the scan area (or the capture button, see `showCaptureButton`) to scan it.
 
 `detectorHeight`: height of the scan area. `detectorSize` is the width of the scan area as a fraction of the
 screen width, `detectorHeight` its height as a fraction of the smaller screen dimension (e.g. `detectorSize: 0.9`
@@ -162,8 +168,8 @@ cordova.plugins.mlkit.barcodeScanner.scan(
 );
 ```
 
-`showCaptureButton` (default `false`): whether a capture button is shown at the bottom of the scanner when `captureButton`
-or `highlightBarcode` is enabled. Without it, capture by tapping the scan area.
+`showCaptureButton` (default `false`): whether a capture button is shown at the bottom of the scanner when the scanner
+waits for a tap (that is, unless `autoScan` is `true`). Without it, capture by tapping the scan area.
 
 ### Output/Return value
 

@@ -24,6 +24,7 @@ export interface IOptions {
   detectorHeight?: number;
   highlightBarcode?: boolean;
   showCaptureButton?: boolean;
+  autoScan?: boolean;
 }
 
 export interface IConfig {
@@ -36,6 +37,7 @@ export interface IConfig {
   detectorHeight: number;
   highlightBarcode: boolean;
   showCaptureButton: boolean;
+  autoScan: boolean;
 }
 
 export interface IResult {

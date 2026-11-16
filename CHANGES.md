@@ -11,9 +11,18 @@ newest first. Everything below is on the `dev` branch.
 - **iOS needs iOS 15.5 or higher** because of the ML Kit pods.
 - The scan options are backwards compatible. `detectorSize` is now the _width_ of the scan area as a fraction of
   the screen width (before: a fraction of the smaller screen dimension; identical in portrait).
+- Scanning requires a tap by default since 5.1.0; use `autoScan: true` for the old automatic scanning.
 - If several barcodes are inside the scan area without `highlightBarcode`, Android now returns the first
   one (it used to return the last).
 - On iOS the scanner is no longer locked to portrait; it rotates with the device if the app allows it.
+
+## 5.1.0 (2026-11-16)
+
+- **Behavior change:** tapping the scan area to capture is now the default; barcodes are no longer returned
+  automatically.
+- New option `autoScan` (default `false`): `true` brings back the previous automatic scanning. It is ignored when
+  `captureButton` or `highlightBarcode` is `true`, because the user then has to tap.
+- **Upgrading from 5.0.x:** add `autoScan: true` to keep the old behavior.
 
 ## 5.0.0 (2026-11-11)
 
