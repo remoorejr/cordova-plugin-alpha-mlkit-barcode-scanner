@@ -143,7 +143,7 @@ as soon as one is detected instead. The options `captureButton` and `highlightBa
 barcode is returned.
 
 `autoScan` (default `false`): when `true`, a barcode is returned as soon as one is detected in the scan area, without
-a tap. `autoScan` is ignored (the user has to tap) when `captureButton` or `highlightBarcode` is `true`.
+a tap. `autoScan` is ignored (the user has to tap) when `showCaptureButton`, `captureButton` or `highlightBarcode` is `true`.
 
 `captureButton`: when `true`, the user always has to tap to scan, even if `autoScan` is `true`. The user lines up the
 barcode in the viewfinder and taps the scan area (or the capture button, see `showCaptureButton`) to scan it.
@@ -168,8 +168,9 @@ cordova.plugins.mlkit.barcodeScanner.scan(
 );
 ```
 
-`showCaptureButton` (default `false`): whether a capture button is shown at the bottom of the scanner when the scanner
-waits for a tap (that is, unless `autoScan` is `true`). Without it, capture by tapping the scan area.
+`showCaptureButton` (default `false`): whether a capture button is shown at the bottom of the scanner.
+It is optional: by default the user taps the scan area to capture; with `showCaptureButton: true` the user can tap
+either the scan area or the button. Enabling it turns `autoScan` off.
 
 ### Output/Return value
 

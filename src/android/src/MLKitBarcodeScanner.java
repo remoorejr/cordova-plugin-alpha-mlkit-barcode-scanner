@@ -122,7 +122,8 @@ public class MLKitBarcodeScanner extends CordovaPlugin {
     intent.putExtra("DetectorSize", config.optDouble("detectorSize", 0.5));
     intent.putExtra("RotateCamera", config.optBoolean("rotateCamera", false));
     // Tap-to-capture is the default; autoScan restores automatic scanning unless a capture button was requested.
-    intent.putExtra("CaptureButton", config.optBoolean("captureButton", false) || !config.optBoolean("autoScan", false));
+    intent.putExtra("CaptureButton", config.optBoolean("captureButton", false) || config.optBoolean("showCaptureButton", false)
+        || !config.optBoolean("autoScan", false));
     intent.putExtra("DetectorHeight", config.optDouble("detectorHeight", 0));
     intent.putExtra("ShowCaptureButton", config.optBoolean("showCaptureButton", false));
     intent.putExtra("HighlightBarcode", config.optBoolean("highlightBarcode", false));

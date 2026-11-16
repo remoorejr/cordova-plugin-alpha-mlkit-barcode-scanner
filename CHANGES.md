@@ -21,7 +21,7 @@ newest first. Everything below is on the `dev` branch.
 - **Behavior change:** tapping the scan area to capture is now the default; barcodes are no longer returned
   automatically.
 - New option `autoScan` (default `false`): `true` brings back the previous automatic scanning. It is ignored when
-  `captureButton` or `highlightBarcode` is `true`, because the user then has to tap.
+  `showCaptureButton`, `captureButton` or `highlightBarcode` is `true`, because the user then has to tap.
 - **Upgrading from 5.0.x:** add `autoScan: true` to keep the old behavior.
 
 ## 5.0.0 (2026-11-11)
