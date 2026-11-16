@@ -65,27 +65,51 @@ function renderHtml() {
 <style>${STYLE}</style></head><body>${marked.parse(markdown, { gfm: true })}</body></html>`;
 }
 
+// Edge/Chrome can return before the PDF is completely written, so wait until the file exists and its size stops changing.
+function waitForFile(file, timeoutMs) {
+  const deadline = Date.now() + timeoutMs;
+  let lastSize = -1;
+  while (Date.now() < deadline) {
+    if (fs.existsSync(file)) {
+      const size = fs.statSync(file).size;
+      if (size > 0 && size === lastSize) {
+        return;
+      }
+      lastSize = size;
+    }
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500);
+  }
+  throw new Error('The browser did not produce a PDF in time.');
+}
+
 function main() {
   const browser = findBrowser();
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'readme-pdf-'));
   const htmlPath = path.join(tmpDir, 'readme.html');
+  const tmpPdfPath = path.join(tmpDir, 'readme.pdf');
 
   try {
     fs.writeFileSync(htmlPath, renderHtml());
     execFileSync(
       browser,
       [
-        '--headless',
+        '--headless=new',
         '--disable-gpu',
         '--no-pdf-header-footer',
         `--user-data-dir=${path.join(tmpDir, 'profile')}`,
-        `--print-to-pdf=${pdfPath}`,
+        `--print-to-pdf=${tmpPdfPath}`,
         `file:///${htmlPath.replace(/\\/g, '/')}`,
       ],
       { stdio: 'ignore' },
     );
+    waitForFile(tmpPdfPath, 30000);
+    fs.copyFileSync(tmpPdfPath, pdfPath);
   } finally {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    } catch (error) {
+      // the browser may still hold the profile folder; the OS cleans the temp directory up
+    }
   }
 
   console.log(`Built ${path.relative(root, pdfPath)} from ${path.relative(root, readmePath)}`);
