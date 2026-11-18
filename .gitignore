@@ -16,3 +16,4 @@ gradlew*
 
 # Other files
 .eslintcache
+.vscode/settings.json
